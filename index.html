@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LAMA صيانة</title>
+<meta name="theme-color" content="#0F1B2D">
+<meta name="application-name" content="LAMA صيانة">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="LAMA صيانة">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+  html, body { margin: 0; height: 100%; background: #0F1B2D; }
+  #splash { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: #0F1B2D; }
+  #splash img { width: min(30vw, 120px); height: auto; border-radius: 24px; }
+  #off { display: none; position: fixed; inset: 0; background: #0F1B2D; color: #F3F5F9; font: 16px/1.7 system-ui, sans-serif;
+         align-items: center; justify-content: center; text-align: center; padding: 24px; }
+  #off button { margin-top: 14px; font: inherit; color: #fff; background: #2457D6; border: 0; border-radius: 10px; padding: 10px 22px; }
+</style>
+</head>
+<body>
+<div id="splash" role="status" aria-label="LAMA صيانة"><img src="icon-192.png" alt=""></div>
+<div id="off"><div>مفيش إنترنت دلوقتي.<br>اتأكد من النت وجرّب تاني.<br><button onclick="location.reload()">جرّب تاني</button></div></div>
+<script>
+  // النظام نفسه على Google (نفس الرابط العادي)؛ الشباك ده بيجيبه ويعرضه هنا،
+  // وبعدها النظام بيكلم Google عن طريق الإنترنت — من غير حساب Google على الجهاز.
+  // ⚠️ حط هنا رابط /exec بتاع نظام الصيانة
+  var EXEC = 'https://script.google.com/macros/s/AKfycbyuRIL4i8FjBJWixw7l2IbgcJlsV38ROOdOvZA0-SW7oxy9CIw4LE-QAfzcqeaSZuG9/exec';
+  var SALES = new URLSearchParams(location.search).get('view') === 'sales';
+  var PWA_HEAD = '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">' +
+    '<meta name="theme-color" content="#0F1B2D"><link rel="manifest" href="manifest.webmanifest">' +
+    '<link rel="icon" type="image/png" sizes="32x32" href="icon-32.png"><link rel="apple-touch-icon" href="apple-touch-icon.png">' +
+    '<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="LAMA صيانة">' +
+    '<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><title>LAMA صيانة</title>' +
+    '<script>window.LAMA_API=' + JSON.stringify(EXEC) + ';<\/script>';
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function () {});
+  function offline() { document.getElementById('off').style.display = 'flex'; }
+  fetch(EXEC + '?raw=1' + (SALES ? '&view=sales' : '') + '&t=' + Date.now(), { credentials: 'omit', cache: 'no-store' })
+    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
+    .then(function (html) {
+      if (html.indexOf('LAMA_API') < 0) throw new Error('not the app');
+      html = html.replace(/<base[^>]*>/i, '').replace(/<title>[\s\S]*?<\/title>/i, '');
+      html = /<head>/i.test(html) ? html.replace(/<head>/i, '<head>' + PWA_HEAD) : PWA_HEAD + html;
+      document.open(); document.write(html); document.close();
+    })
+    .catch(offline);
+</script>
+</body>
+</html>
